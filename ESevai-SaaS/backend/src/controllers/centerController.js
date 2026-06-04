@@ -2,6 +2,8 @@ const {
     createCenter
 } = require('../services/centerService');
 
+console.log("createCenter =", createCenter);
+
 const create = async (
     req,
     res
