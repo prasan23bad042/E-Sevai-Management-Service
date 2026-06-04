@@ -13,8 +13,6 @@ const createCenter = async (
         pincode
     } = centerData;
 
-    // Count existing centers
-
     const {
         count,
         error: countError
@@ -33,8 +31,6 @@ const createCenter = async (
         'CTR' +
         String(count + 1)
             .padStart(4, '0');
-
-    // Create Center
 
     const {
         data: center,
@@ -57,8 +53,6 @@ const createCenter = async (
         throw centerError;
     }
 
-    // Add owner as manager
-
     const {
         error: staffError
     } = await supabase
@@ -77,6 +71,28 @@ const createCenter = async (
 
 };
 
+const getMyCenter = async (
+    userId
+) => {
+
+    const {
+        data,
+        error
+    } = await supabase
+        .from('centers')
+        .select('*')
+        .eq('owner_id', userId)
+        .single();
+
+    if (error) {
+        throw error;
+    }
+
+    return data;
+
+};
+
 module.exports = {
-    createCenter
+    createCenter,
+    getMyCenter
 };

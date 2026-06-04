@@ -3,7 +3,8 @@ const express = require('express');
 const router = express.Router();
 
 const {
-    create
+    create,
+    myCenter
 } = require('../controllers/centerController');
 
 const {
@@ -14,6 +15,12 @@ router.post(
     '/',
     authenticateUser,
     create
+);
+
+router.get(
+    '/my-center',
+    authenticateUser,
+    myCenter
 );
 
 module.exports = router;

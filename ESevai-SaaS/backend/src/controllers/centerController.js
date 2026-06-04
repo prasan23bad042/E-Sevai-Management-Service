@@ -1,8 +1,7 @@
 const {
-    createCenter
+    createCenter,
+    getMyCenter
 } = require('../services/centerService');
-
-console.log("createCenter =", createCenter);
 
 const create = async (
     req,
@@ -35,6 +34,37 @@ const create = async (
 
 };
 
+const myCenter = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const center =
+            await getMyCenter(
+                req.user.id
+            );
+
+        res.json({
+            success: true,
+            center
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
 module.exports = {
-    create
+    create,
+    myCenter
 };
