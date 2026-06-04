@@ -81,8 +81,7 @@ const getMyCenter = async (
     } = await supabase
         .from('centers')
         .select('*')
-        .eq('owner_id', userId)
-        .single();
+        .eq('owner_id', userId);
 
     if (error) {
         throw error;
