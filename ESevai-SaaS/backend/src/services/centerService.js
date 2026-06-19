@@ -14,6 +14,24 @@ const createCenter = async (
     } = centerData;
 
     const {
+        data: existingCenter,
+        error: existingCenterError
+    } = await supabase
+        .from('centers')
+        .select('*')
+        .eq('owner_id', userId);
+
+    if (existingCenterError) {
+        throw existingCenterError;
+    }
+
+    if (existingCenter.length > 0) {
+        throw new Error(
+            'Center already exists for this owner'
+        );
+    }
+
+    const {
         count,
         error: countError
     } = await supabase

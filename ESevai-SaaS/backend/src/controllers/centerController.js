@@ -18,7 +18,7 @@ const create = async (
 
         res.status(201).json({
             success: true,
-            center
+            data: center
         });
 
     } catch (error) {
@@ -48,7 +48,7 @@ const myCenter = async (
 
         res.json({
             success: true,
-            center
+            data: center[0] || null
         });
 
     } catch (error) {

@@ -1,0 +1,239 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "E-Sevai SaaS Platform API Specification",
+    "description": "Production API specifications cataloguing all endpoints, parameters, and roles for the E-Sevai SaaS platform backend service.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new E-Sevai Center Owner user account",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "fullName"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 6 },
+                  "fullName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registration successful"
+          },
+          "400": {
+            "description": "Invalid payload"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user credentials and retrieve JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/centers": {
+      "post": {
+        "summary": "Create an E-Sevai center onboarding application request",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "address", "district", "state", "pincode"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "address": { "type": "string" },
+                  "district": { "type": "string" },
+                  "state": { "type": "string" },
+                  "pincode": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Center request generated successfully" }
+        }
+      }
+    },
+    "/applications": {
+      "post": {
+        "summary": "Submit a citizen application request for a service",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["service_id", "center_id", "customer_name", "customer_phone"],
+                "properties": {
+                  "service_id": { "type": "string", "format": "uuid" },
+                  "center_id": { "type": "string", "format": "uuid" },
+                  "customer_id": { "type": "string", "format": "uuid", "nullable": true },
+                  "customer_name": { "type": "string" },
+                  "customer_phone": { "type": "string" },
+                  "customer_email": { "type": "string", "format": "email" },
+                  "customer_address": { "type": "string" },
+                  "remarks": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Application submitted successfully" }
+        }
+      }
+    },
+    "/documents/upload": {
+      "post": {
+        "summary": "Upload multipart application document to storage",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["application_id", "document_name", "file"],
+                "properties": {
+                  "application_id": { "type": "string", "format": "uuid" },
+                  "document_name": { "type": "string" },
+                  "file": { "type": "string", "format": "binary" },
+                  "expiry_date": { "type": "string", "format": "date" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Document uploaded successfully" }
+        }
+      }
+    },
+    "/payments": {
+      "post": {
+        "summary": "Initiate payment request for an application",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["application_id"],
+                "properties": {
+                  "application_id": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment request initiated successfully" }
+        }
+      }
+    },
+    "/payments/{id}/pay": {
+      "put": {
+        "summary": "Record payment completion status",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["payment_method"],
+                "properties": {
+                  "payment_method": { "type": "string", "enum": ["cash", "upi", "credit_card", "debit_card", "net_banking"] },
+                  "transaction_reference": { "type": "string" },
+                  "cash_received": { "type": "number" },
+                  "balance_returned": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Payment successfully registered" }
+        }
+      }
+    },
+    "/dashboard/admin": {
+      "get": {
+        "summary": "Retrieve Global Admin Dashboard aggregates",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Analytics counts returned successfully" }
+        }
+      }
+    },
+    "/reports/applications": {
+      "get": {
+        "summary": "Generate Applications Report (supports multi-format exports)",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "export", "in": "query", "schema": { "type": "string", "enum": ["json", "csv", "excel", "pdf"] } },
+          { "name": "date_start", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "date_end", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Report generated successfully" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
